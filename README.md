@@ -21,6 +21,20 @@ use OmniAuth::Builder do
 end
 ```
 
+Profile Info
+------------
+
+After the user signs in, the `uid` reported by OmniAuth will be their URL they entered. The gem will also attempt to parse their URL for an h-card, and return their real name and profile image if available.
+
+```
+{
+  "url": "http://aaronparecki.com/",
+  "name": "Aaron Parecki",
+  "image": "https://aaronparecki.com/images/aaronpk.png"
+}
+```
+
+
 Basic Sinatra Example
 ---------------------
 
