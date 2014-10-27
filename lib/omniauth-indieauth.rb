@@ -1,2 +1,2 @@
-require '../lib/omniauth-indieauth/version'
-require '../lib/omniauth/strategies/indieauth'
+require 'omniauth-indieauth/version'
+require 'omniauth/strategies/indieauth'
