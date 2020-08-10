@@ -1,4 +1,4 @@
-inherit_from: .rubocop_todo.yml
+#inherit_from: .rubocop_todo.yml
 
 require:
   - rubocop-performance
@@ -8,6 +8,7 @@ AllCops:
   NewCops: enable
   Exclude:
     - vendor/**/*
+  TargetRubyVersion: 2.5
 
 Metrics/BlockLength:
   Exclude:
@@ -17,6 +18,10 @@ Naming/FileName:
   Exclude:
     - lib/omniauth-indieauth.rb
 
+RSpec/ExampleLength:
+  Enabled: false
+
 RSpec/FilePath:
   CustomTransform:
     IndieAuth: indieauth
+    OmniAuth: omniauth

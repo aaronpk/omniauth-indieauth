@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'sinatra', '~> 2.0'
+
 group :development do
   gem 'bundler-audit', '~> 0.7'
   gem 'coveralls', '~> 0.8'
@@ -16,8 +18,4 @@ group :development do
   gem 'shotgun', '~> 0.9'
   gem 'webmock', '~> 3.8'
   gem 'yard', '~> 0.9'
-end
-
-group :example do
-  gem 'sinatra', '~> 2.0'
 end

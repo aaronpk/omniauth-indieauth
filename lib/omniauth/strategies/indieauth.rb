@@ -2,7 +2,11 @@
 
 require 'omniauth'
 require 'faraday'
+require 'faraday_middleware'
+require 'indieauth_discovery/profile'
 require 'cgi'
+
+require 'omniauth/indieauth/errors'
 
 module OmniAuth
   module Strategies
@@ -10,68 +14,121 @@ module OmniAuth
     class IndieAuth
       include OmniAuth::Strategy
 
-      option :name, 'indieauth'
-      option :server, 'https://indieauth.com'
+      option :name, :indieauth
       option :client_id
 
-      attr_accessor :me
-
-      def redirect_uri
-        full_host + script_name + callback_path
-      end
+      attr_reader :profile
 
       def request_phase
-        puts redirect_uri
-        redirect "#{options.server}/sign-in?redirect_uri=#{URI.encode_www_form_component(redirect_uri)}&client_id=#{URI.encode_www_form_component(options.client_id)}"
+        authorize if valid_request_phase_params?
+
+        profile_url_form
       end
 
       def callback_phase
-        puts request.params.inspect
+        @profile = IndieAuthDiscovery::Profile.discover(profile_url)
+        super if authenticate
+      end
 
-        conn = Faraday.new(url: "#{options.server}/auth") do |faraday|
-          faraday.request :url_encoded # form-encode POST params
-        end
-        response = Faraday.post "#{options.server}/auth", {
+      uid { authentication_response.body['me'] }
+
+      info { authentication_response.body['profile'] || {} }
+
+      private
+
+      attr_reader :authentication_response
+
+      def client_id
+        options.client_id || "#{request.base_url}/"
+      end
+
+      def valid_request_phase_params?
+        String(request.params['me']).strip != ''
+      end
+
+      def authorize
+        @profile = IndieAuthDiscovery::Profile.discover(request.params['me'])
+        cache_profile_endpoints
+        redirect authorization_url.to_s
+      end
+
+      def authorization_url
+        authorization_endpoint_url.class.build(
+          host: authorization_endpoint_url.host,
+          path: authorization_endpoint_url.path,
+          query: URI.encode_www_form(authorization_params)
+        )
+      end
+
+      def authorization_params
+        params = {
+          client_id: client_id,
+          redirect_uri: redirect_uri,
+          me: profile_url,
+          state: SecureRandom.hex(24),
+          response_type: 'code'
+        }
+        session['omniauth.state'] = params[:state]
+        params
+      end
+
+      def cache_profile_endpoints
+        session['omniauth.profile_url'] = profile.url.to_s
+        session['omniauth.authorization_endpoint'] = profile.authorization_endpoint
+        session['omniauth.token_endpoint'] = profile.token_endpoint
+      end
+
+      def authenticate
+        @authentication_response = authorization_endpoint.post('', authentication_params)
+        indieauth_failure(@authentication_response, authentication_error) unless @authentication_response.status < 300
+        @authentication_response
+      end
+
+      def authentication_params
+        {
+          client_id: client_id,
           code: request.params['code'],
-          client_id: options.client_id,
           redirect_uri: redirect_uri
         }
-        puts response.body
-
-        data = CGI.parse response.body
-
-        if !data['me'].empty?
-          @me = data['me'][0]
-        else
-          fail!(data['error'][0].to_sym, CallbackError.new(data['error'][0].to_sym, data['error_description'][0]))
-        end
-
-        super
       end
 
-      uid do
-        @me
+      def indieauth_failure(response, error_class)
+        error_key = response.body['error']
+        error_desc = response.body['error_description']
+        error_uri = response.body['error_uri']
+        error = error_class.new(error_desc, error_key, error_uri)
+        fail!(error_key, error)
       end
 
-      info do
-        # TODO: Parse the url and look for an h-card to fill out the profile info
-
-        {
-          url: @me
-        }
+      def authentication_error
+        OmniAuth::IndieAuth::AuthenticationError
       end
 
-      class CallbackError < StandardError
-        attr_accessor :error, :error_reason, :error_uri
+      def profile_url_form
+        form = OmniAuth::Form.new(title: 'IndieAuth Authorization')
+        form.label_field('Profile URL', 'me')
+        form.input_field('url', 'me')
+        form.to_response
+      end
 
-        def initialize(error, error_reason = nil, error_uri = nil)
-          self.error = error
-          self.error_reason = error_reason
-          self.error_uri = error_uri
-        end
+      def redirect_uri
+        uri = URI.parse(callback_url)
+        uri.class.build(host: uri.host, path: uri.path, port: uri.port)
+      end
 
-        def message
-          [error, error_reason, error_uri].compact.join(' | ')
+      def profile_url
+        session['omniauth.profile_url'] || profile.url.to_s
+      end
+
+      def authorization_endpoint_url
+        URI.parse(session['omniauth.authorization_endpoint'] || profile.authorization_endpoint)
+      end
+
+      def authorization_endpoint
+        @authorization_endpoint ||= Faraday.new(authorization_endpoint_url) do |f|
+          f.request :url_encoded
+          f.response :json, content_type: /\bjson\z/
+          f.adapter Faraday.default_adapter
         end
       end
     end
