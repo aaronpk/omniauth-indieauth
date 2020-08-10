@@ -17,6 +17,6 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- exe/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_runtime_dependency 'faraday', '~> 0.9'
+  s.add_runtime_dependency 'faraday', '>= 0.9', '< 2.0'
   s.add_runtime_dependency 'omniauth', '~> 1.9'
 end
