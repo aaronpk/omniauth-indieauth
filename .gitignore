@@ -1,0 +1,16 @@
+.byebug_history
+.env
+.rspec_status
+.ruby-version
+.rvmrc
+*.gem
+/_yardoc/
+/.bundle/
+/.config
+/.yardoc/
+/coverage/
+/doc/
+/pkg/
+/rdoc/
+/tmp/
+/vendor/bundle

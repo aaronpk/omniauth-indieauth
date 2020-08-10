@@ -1,9 +1,11 @@
+# frozen_string_literal: true
 
+# Example Sinatra application.
 class App < Sinatra::Base
-  use Rack::Session::Cookie, :secret => "change_me"
+  use Rack::Session::Cookie, secret: 'change_me'
 
   use OmniAuth::Builder do
-    provider :indieauth, :server => 'https://indieauth.com', :client_id => 'http://example.com'
+    provider :indieauth, server: 'https://indieauth.com', client_id: 'http://example.com'
   end
 
   get '/' do
