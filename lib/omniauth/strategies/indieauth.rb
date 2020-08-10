@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 require 'omniauth'
 require 'faraday'
 require 'cgi'
 
 module OmniAuth
   module Strategies
+    # IndieAuth strategy for OmniAuth.
     class IndieAuth
       include OmniAuth::Strategy
 
@@ -25,19 +28,19 @@ module OmniAuth
       def callback_phase
         puts request.params.inspect
 
-        conn = Faraday.new(:url => "#{options.server}/auth") do |faraday|
-          faraday.request  :url_encoded             # form-encode POST params
+        conn = Faraday.new(url: "#{options.server}/auth") do |faraday|
+          faraday.request :url_encoded # form-encode POST params
         end
         response = Faraday.post "#{options.server}/auth", {
-          :code => request.params['code'],
-          :client_id => options.client_id,
-          :redirect_uri => redirect_uri
+          code: request.params['code'],
+          client_id: options.client_id,
+          redirect_uri: redirect_uri
         }
         puts response.body
 
-        data = CGI::parse response.body
+        data = CGI.parse response.body
 
-        if data['me'].length > 0
+        if !data['me'].empty?
           @me = data['me'][0]
         else
           fail!(data['error'][0].to_sym, CallbackError.new(data['error'][0].to_sym, data['error_description'][0]))
@@ -54,7 +57,7 @@ module OmniAuth
         # TODO: Parse the url and look for an h-card to fill out the profile info
 
         {
-          :url => @me,
+          url: @me
         }
       end
 
@@ -71,7 +74,6 @@ module OmniAuth
           [error, error_reason, error_uri].compact.join(' | ')
         end
       end
-
     end
   end
 end
