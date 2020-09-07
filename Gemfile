@@ -19,5 +19,5 @@ group :development do
 end
 
 group :example do
-  gem 'sinatra', '~> 2.0'
+  gem 'sinatra', '~> 2.1'
 end
