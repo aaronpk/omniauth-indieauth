@@ -11,7 +11,7 @@ group :development do
   gem 'rake', '~> 13.0'
   gem 'rspec', '~> 3.9'
   gem 'rubocop', '~> 0.89'
-  gem 'rubocop-performance', '~> 1.7'
+  gem 'rubocop-performance', '~> 1.8'
   gem 'rubocop-rspec', '~> 1.42'
   gem 'shotgun', '~> 0.9'
   gem 'webmock', '~> 3.8'
