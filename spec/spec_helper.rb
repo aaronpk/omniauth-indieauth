@@ -1,13 +1,20 @@
+# frozen_string_literal: true
+
 require 'bundler/setup'
 
 require 'simplecov'
 require 'coveralls'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
-  SimpleCov::Formatter::HTMLFormatter,
-  Coveralls::SimpleCov::Formatter
-])
+                                                                 SimpleCov::Formatter::HTMLFormatter,
+                                                                 Coveralls::SimpleCov::Formatter
+                                                               ])
 SimpleCov.start
+
+require 'rack/test'
+require 'webmock/rspec'
+
+WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -23,6 +30,8 @@ RSpec.configure do |config|
   config.default_formatter = 'doc' if config.files_to_run.one?
   config.example_status_persistence_file_path = '.rspec_status'
   config.order = :random
-  config.profile_examples = 10
+  # config.profile_examples = 10
   config.shared_context_metadata_behavior = :apply_to_host_groups
+
+  config.include Rack::Test::Methods
 end
