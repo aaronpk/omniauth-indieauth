@@ -12,7 +12,7 @@ group :development do
   gem 'rspec', '~> 3.9'
   gem 'rubocop', '~> 0.89'
   gem 'rubocop-performance', '~> 1.7'
-  gem 'rubocop-rspec', '~> 1.42'
+  gem 'rubocop-rspec', '~> 1.44'
   gem 'shotgun', '~> 0.9'
   gem 'webmock', '~> 3.8'
   gem 'yard', '~> 0.9'
