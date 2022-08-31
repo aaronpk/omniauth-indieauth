@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_runtime_dependency 'faraday', '~> 0.9'
-  s.add_runtime_dependency 'omniauth', '~> 1.9'
+  s.add_runtime_dependency 'omniauth', '>= 1.9', '< 3.0'
 end
