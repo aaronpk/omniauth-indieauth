@@ -10,7 +10,7 @@ group :development do
   gem 'rack-test', '~> 1.1'
   gem 'rake', '~> 13.0'
   gem 'rspec', '~> 3.9'
-  gem 'rubocop', '~> 0.89'
+  gem 'rubocop', '~> 1.38'
   gem 'rubocop-performance', '~> 1.7'
   gem 'rubocop-rspec', '~> 1.42'
   gem 'shotgun', '~> 0.9'
